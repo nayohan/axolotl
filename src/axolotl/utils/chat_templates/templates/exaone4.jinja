@@ -34,23 +34,22 @@
     {%- if role not in role_indicators %}
         {{- raise_exception('Unknown role: ' ~ role) }}
     {%- endif %}
-    {# ---- Case A: If the first message is "system", handle it here alone (without continue) ---- #}
-    {%- if i == 0 and role == 'system' %}
+    {%- if role == 'system' or (tools is defined and tools) %}
+        {# ---- Case A: If the first message is "system", handle it here alone (without continue) ---- #}
+        {%- if i == 0 and role == 'system' %}
             {{- role_indicators['system'] }}
             {{- msg.content }}
             {%- if tools is defined and tools %}
                 {{- "\n\n" }}{{- available_tools(tools) }}
             {%- endif %}
             {{- end_of_turn -}}
-    {%- else %}
-    {# ---- Case B: If the first message is tools instead of system, inject the system tools preamble ---- #}
-        {%- if i == 0 and tools is defined and tools %}
+        {# ---- Case B: If the first message is tools instead of system, inject the system tools preamble ---- #}
+        {%- elif i == 0 and tools is defined and tools %}
             {{- role_indicators['system'] }}
             {{- available_tools(tools) }}
             {{- end_of_turn -}}
         {%- endif %}
-    {%- endif %}
-    {%- if role == 'assistant' %}
+    {%- elif role == 'assistant' %}
         {{- role_indicators['assistant'] }}
         {%- if msg.content %}
             {%- if "</think>" in msg.content %}
